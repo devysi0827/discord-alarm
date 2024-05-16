@@ -1,22 +1,14 @@
+const readline = require("readline");
 const { webhook } = require("./env");
 const cron = require("node-cron");
 const { exec } = require("child_process");
 
-function alarm(time, message, isSingleUse) {
-  const messageJson = JSON.stringify({ content: message });
-
-  console.log(messageJson, typeof messageJson);
-
+function alarm(time, cmd, isSingleUse) {
   cron.schedule(
-    // 분 시간 일 월 요일 (월 = 1)
     time,
     () => {
-      console.log("Sending curl request...", messageJson, webhook);
-      console.log(JSON.parse(messageJson));
+      const command = `${cmd}`;
 
-      const command = `curl -i -H "Accept: application/json" -H "Content-Type: application/json" -X POST -d '${messageJson}' ${webhook}`;
-
-      console.log(command);
       exec(command, (error, stdout, stderr) => {
         if (error) {
           console.error(`exec error: ${error}`);
@@ -32,4 +24,19 @@ function alarm(time, message, isSingleUse) {
   );
 }
 
-alarm("* * * * *", "sell");
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+});
+
+let inputCmd;
+
+rl.on("line", (line) => {
+  inputCmd = line;
+  console.log(line);
+  rl.close();
+});
+rl.on("close", () => {
+  // 분 시간 일 월 요일 (월 = 1)
+  alarm("00 17 * * *", inputCmd);
+});
