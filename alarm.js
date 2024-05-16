@@ -1,5 +1,4 @@
 const readline = require("readline");
-const { webhook } = require("./env");
 const cron = require("node-cron");
 const { exec } = require("child_process");
 
